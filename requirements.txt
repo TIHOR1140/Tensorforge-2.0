@@ -1,0 +1,33 @@
+# ==========================================
+# TensorForge 2.0 - Phase 2 Dependencies
+# ==========================================
+
+# Core Web & API Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.8.0
+pydantic-settings>=2.4.0
+python-multipart>=0.0.9
+
+# Schema Validation & Serialization
+jsonschema>=4.23.0
+pyyaml>=6.0.2
+
+# Machine Learning & Data Processing
+numpy>=1.26.0
+pandas>=2.2.0
+scikit-learn>=1.5.0
+joblib>=1.4.0
+
+# HTTP Client & Utilities
+httpx>=0.27.0
+requests>=2.32.0
+
+# Testing & Quality Assurance
+pytest>=8.3.0
+pytest-asyncio>=0.24.0
+
+# Optional: Enhanced text processing & NLP
+# torch>=2.2.0
+# transformers>=4.40.0
+# sentencepiece>=0.2.0
