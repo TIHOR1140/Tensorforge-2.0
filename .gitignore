@@ -42,6 +42,8 @@ venv.bak/
 *.swo
 *~
 .DS_Store
+node_modules/
+frontend/node_modules/
 
 # Pytest / Coverage
 .pytest_cache/

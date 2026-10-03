@@ -1,0 +1,66 @@
+[
+  {
+    "ticket_id": "TF-SAMPLE-001",
+    "channel": "chat",
+    "subject": "",
+    "text": "bro mage order eka hour ekakata wada late, driver call ganne na. refund ekak denna",
+    "language": "singlish",
+    "expected_category": "delivery_delay"
+  },
+  {
+    "ticket_id": "TF-SAMPLE-002",
+    "channel": "chat",
+    "subject": "",
+    "text": "කාර් එකේ මගේ බෑග් එක අමතක වුණා, ඩ්‍රයිවර්ට කතා කරන්න පුළුවන්ද?",
+    "language": "si",
+    "expected_category": "lost_item"
+  },
+  {
+    "ticket_id": "TF-SAMPLE-003",
+    "channel": "chat",
+    "subject": "",
+    "text": "என் ஆர்டர்ல ஒரு ஐட்டம் வரல, பணம் திருப்பி தாங்க",
+    "language": "ta",
+    "expected_category": "order_missing_wrong"
+  },
+  {
+    "ticket_id": "TF-SAMPLE-004",
+    "channel": "call_transcript",
+    "subject": "",
+    "text": "customer: hello hello yes the driver took a wrong turn and he is not stopping the car i am scared please help me",
+    "language": "en",
+    "expected_category": "safety_conduct"
+  },
+  {
+    "ticket_id": "TF-SAMPLE-005",
+    "channel": "email",
+    "subject": "Missing items and cold food in Order #98213",
+    "text": "Hello Support, I ordered two burgers and a drink. The drink was missing and the burgers were completely cold and soggy.",
+    "language": "en",
+    "expected_category": "order_missing_wrong"
+  },
+  {
+    "ticket_id": "TF-SAMPLE-006",
+    "channel": "chat",
+    "subject": "",
+    "text": "App crash wenawa payment gateway eka open weddi, white screen enawa",
+    "language": "singlish",
+    "expected_category": "app_technical"
+  },
+  {
+    "ticket_id": "TF-SAMPLE-007",
+    "channel": "chat",
+    "subject": "",
+    "text": "Promo code RIDE50 not working on my account, getting invalid coupon message",
+    "language": "en",
+    "expected_category": "account_promo"
+  },
+  {
+    "ticket_id": "TF-SAMPLE-008",
+    "channel": "chat",
+    "subject": "",
+    "text": "Congratulations you won a lottery ticket! Click here to claim your cash reward",
+    "language": "en",
+    "expected_category": "spam_irrelevant"
+  }
+]

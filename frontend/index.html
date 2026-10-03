@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RideEat Ticket Intelligence — TensorForge 2.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/src/assets/style.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0b1120; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col">
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-emerald-500/20">
+        <i class="fa-solid fa-bolt"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-extrabold text-base tracking-tight text-white">RideEat Support Intelligence</h1>
+          <span class="px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Phase 2 MVP</span>
+        </div>
+        <p class="text-xs text-slate-400">Multilingual Ticket Classification & Dynamic Routing Engine</p>
+      </div>
+    </div>
+
+    <!-- Right Controls: Status & API Key -->
+    <div class="flex items-center space-x-3">
+      <div id="healthBadge" class="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs">
+        <span id="healthDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+        <span id="healthText" class="text-slate-400">Checking health...</span>
+      </div>
+
+      <div class="relative flex items-center">
+        <div class="flex items-center bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 space-x-2">
+          <i class="fa-solid fa-key text-xs text-slate-400"></i>
+          <input id="globalApiKey" type="password" placeholder="Set API Key" class="bg-transparent text-xs text-slate-200 focus:outline-none w-32 font-mono" />
+          <button onclick="saveApiKey()" title="Save API Key" class="text-xs text-emerald-400 hover:text-emerald-300">
+            <i class="fa-solid fa-check"></i>
+          </button>
+        </div>
+      </div>
+
+      <a href="/docs" target="_blank" class="text-xs px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 transition flex items-center gap-1.5 font-medium">
+        <i class="fa-solid fa-code"></i> OpenAPI UI
+      </a>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="border-b border-slate-800 bg-slate-900/50 px-6 py-2 flex space-x-2">
+    <button onclick="switchTab('single')" id="tabBtn-single" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-2">
+      <i class="fa-solid fa-ticket"></i> Single Ticket Workbench
+    </button>
+    <button onclick="switchTab('batch')" id="tabBtn-batch" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition flex items-center gap-2">
+      <i class="fa-solid fa-layer-group"></i> Synchronous Batch (1-100)
+    </button>
+    <button onclick="switchTab('jobs')" id="tabBtn-jobs" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition flex items-center gap-2">
+      <i class="fa-solid fa-server"></i> Async Evaluation Jobs (up to 5,000)
+    </button>
+    <button onclick="switchTab('routing')" id="tabBtn-routing" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition flex items-center gap-2">
+      <i class="fa-solid fa-diagram-project"></i> Routing Reference
+    </button>
+  </div>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6">
+    
+    <!-- TAB 1: SINGLE TICKET WORKBENCH -->
+    <div id="tab-single" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- Input Panel -->
+      <div class="lg:col-span-7 bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div>
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-message text-emerald-400"></i> Classify Single Ticket
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Test real-time multilingual classification (POST /predict)</p>
+          </div>
+          <!-- Presets -->
+          <div class="flex flex-wrap gap-1.5">
+            <button onclick="loadSample('singlish')" class="px-2.5 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 border border-slate-700">Singlish</button>
+            <button onclick="loadSample('sinhala')" class="px-2.5 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 border border-slate-700">සිංහල (si)</button>
+            <button onclick="loadSample('tamil')" class="px-2.5 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 border border-slate-700">தமிழ் (ta)</button>
+            <button onclick="loadSample('safety')" class="px-2.5 py-1 text-[11px] bg-red-950/60 hover:bg-red-900/60 rounded-lg text-red-300 border border-red-800/50">Urgent Safety</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Ticket ID</label>
+            <input id="inputTicketId" type="text" value="TF-TE-000001" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Channel</label>
+            <select id="inputChannel" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+              <option value="chat">chat</option>
+              <option value="email">email</option>
+              <option value="call_transcript">call_transcript</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Subject (Email)</label>
+          <input id="inputSubject" type="text" placeholder="Required only for email channel..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Ticket Body / Conversation Text</label>
+          <textarea id="inputText" rows="6" placeholder="Enter customer ticket text in Sinhala, Tamil, English, Singlish, or Tanglish..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 leading-relaxed font-mono"></textarea>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <span class="text-[11px] text-slate-500">Language auto-handled by model embeddings</span>
+          <button id="btnPredict" onclick="runSinglePrediction()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-semibold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition flex items-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i> Run Prediction
+          </button>
+        </div>
+      </div>
+
+      <!-- Output Panel -->
+      <div class="lg:col-span-5 bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between space-y-4">
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-compass text-teal-400"></i> Classification Result
+            </h2>
+            <span id="latencyBadge" class="text-[11px] font-mono text-slate-400"></span>
+          </div>
+
+          <div id="outputEmpty" class="py-20 text-center text-slate-500">
+            <i class="fa-solid fa-microchip text-4xl mb-3 opacity-40"></i>
+            <p class="text-xs">Submit a ticket to inspect model predictions & routing.</p>
+          </div>
+
+          <div id="outputResult" class="hidden space-y-4 mt-3">
+            <div class="bg-slate-950/80 rounded-xl border border-slate-800 p-4 space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-slate-400">Primary Category:</span>
+                <span id="resCategory" class="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"></span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-slate-400">Routed Team:</span>
+                <span id="resTeam" class="px-2.5 py-1 rounded-md text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"></span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-slate-400">Secondary Category:</span>
+                <span id="resSecondary" class="text-xs font-mono text-slate-300">null</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-slate-400">Urgency Flag:</span>
+                <span id="resUrgent" class="px-2 py-0.5 rounded text-xs font-bold"></span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-slate-400">Confidence Score:</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-24 h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="resConfBar" class="h-full bg-emerald-400 rounded-full" style="width: 0%"></div>
+                  </div>
+                  <span id="resConfidence" class="text-xs font-mono font-bold text-white">0%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Raw JSON Output -->
+            <div class="space-y-1">
+              <span class="text-[11px] text-slate-400 font-semibold">Raw Response (Schema Compliant):</span>
+              <pre id="resRawJson" class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-[11px] font-mono text-emerald-400 max-h-48 overflow-auto"></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-500 border-t border-slate-800 pt-3 flex justify-between">
+          <span>Schema: predict_response.json</span>
+          <span id="modelVersionLabel">Model: v1.0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: SYNCHRONOUS BATCH -->
+    <div id="tab-batch" class="tab-content hidden space-y-4">
+      <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div>
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-layer-group text-emerald-400"></i> Synchronous Batch Prediction (1 - 100 tickets)
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Executes POST /predict/batch with atomic evaluation</p>
+          </div>
+          <button onclick="loadSampleBatch()" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700">
+            <i class="fa-solid fa-file-code"></i> Load Sample Tickets
+          </button>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Batch JSON Payload (array of tickets)</label>
+          <textarea id="batchJsonInput" rows="7" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono"></textarea>
+        </div>
+
+        <div class="flex justify-end">
+          <button onclick="runBatchPrediction()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-semibold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition flex items-center gap-2">
+            <i class="fa-solid fa-play"></i> Run Batch Prediction
+          </button>
+        </div>
+      </div>
+
+      <!-- Batch Results Table -->
+      <div id="batchResultsContainer" class="hidden bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white">Batch Results (<span id="batchCount">0</span> tickets)</h3>
+          <span id="batchLatency" class="text-xs font-mono text-emerald-400"></span>
+        </div>
+        <div class="overflow-x-auto rounded-xl border border-slate-800">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950 text-slate-400 uppercase font-semibold text-[10px]">
+              <tr>
+                <th class="p-3">Ticket ID</th>
+                <th class="p-3">Category</th>
+                <th class="p-3">Assigned Team</th>
+                <th class="p-3">Secondary</th>
+                <th class="p-3">Urgent</th>
+                <th class="p-3">Confidence</th>
+              </tr>
+            </thead>
+            <tbody id="batchTableBody" class="divide-y divide-slate-800 font-mono text-slate-200"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: ASYNC BATCH JOBS -->
+    <div id="tab-jobs" class="tab-content hidden space-y-4">
+      <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div>
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-server text-purple-400"></i> Large Async Evaluation Jobs (up to 5,000 tickets)
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Non-blocking background queue via POST /batch/jobs and GET /batch/jobs/{id}</p>
+          </div>
+          <button onclick="submitTestJob()" class="px-3 py-1.5 text-xs bg-purple-600 hover:bg-purple-500 text-white rounded-xl shadow-lg shadow-purple-600/20 font-medium">
+            <i class="fa-solid fa-plus"></i> Submit Demo Job
+          </button>
+        </div>
+
+        <!-- Active Job Card -->
+        <div id="activeJobCard" class="hidden bg-slate-950/80 border border-purple-500/30 rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span id="jobStatusBadge" class="px-2 py-0.5 rounded text-[11px] font-bold bg-purple-500/20 text-purple-300 uppercase">RUNNING</span>
+              <span id="jobIdLabel" class="text-xs font-mono text-slate-300"></span>
+            </div>
+            <button onclick="cancelActiveJob()" class="text-xs text-red-400 hover:text-red-300 px-2 py-1 bg-red-950/40 rounded border border-red-900/40">
+              <i class="fa-solid fa-xmark"></i> Cancel Job
+            </button>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs text-slate-400">
+              <span>Progress: <span id="jobProcessedCount">0</span> / <span id="jobTotalCount">0</span></span>
+              <span id="jobProgressPercent">0%</span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+              <div id="jobProgressBar" class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Job Results Display -->
+        <div id="jobResultsContainer" class="hidden space-y-2">
+          <h3 class="text-xs font-bold text-white uppercase tracking-wider">Job Predictions:</h3>
+          <pre id="jobResultsRaw" class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-[11px] font-mono text-purple-300 max-h-60 overflow-auto"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: ROUTING REFERENCE -->
+    <div id="tab-routing" class="tab-content hidden space-y-4">
+      <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div>
+          <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-diagram-project text-cyan-400"></i> Category → Support Team Routing Reference
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Fixed 11-category mapping table enforced by competition contract</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">payment_refund</span>
+            <p class="text-xs font-bold text-emerald-400 mt-1">Payments & Refunds</p>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">ride_trip_issue</span>
+            <p class="text-xs font-bold text-cyan-400 mt-1">Ride Operations</p>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">lost_item</span>
+            <p class="text-xs font-bold text-indigo-400 mt-1">Lost & Found</p>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">order_missing_wrong</span>
+            <p class="text-xs font-bold text-amber-400 mt-1">Food Operations</p>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">delivery_delay</span>
+            <p class="text-xs font-bold text-orange-400 mt-1">Delivery Operations</p>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">food_quality</span>
+            <p class="text-xs font-bold text-rose-400 mt-1">Restaurant Quality</p>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">account_promo</span>
+            <p class="text-xs font-bold text-purple-400 mt-1">Account Services</p>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">safety_conduct</span>
+            <p class="text-xs font-bold text-red-400 mt-1">Trust & Safety</p>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">app_technical</span>
+            <p class="text-xs font-bold text-blue-400 mt-1">Tech Support</p>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">general_inquiry</span>
+            <p class="text-xs font-bold text-teal-400 mt-1">Front-line Support</p>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">spam_irrelevant</span>
+            <p class="text-xs font-bold text-slate-400 mt-1">Auto-close / Spam Filter</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="border-t border-slate-800 bg-slate-950 px-6 py-4 text-center text-xs text-slate-500">
+    TensorForge 2.0 — IEEE Computer Society KDU • RideEat Multilingual Ticket Router
+  </footer>
+
+  <script>
+    let activeJobPollInterval = null;
+    let activeJobId = null;
+
+    // Load saved API key
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedKey = localStorage.getItem('tf_api_key');
+      if (savedKey) document.getElementById('globalApiKey').value = savedKey;
+      checkHealth();
+      setInterval(checkHealth, 10000);
+      loadSample('singlish');
+    });
+
+    function saveApiKey() {
+      const key = document.getElementById('globalApiKey').value.trim();
+      localStorage.setItem('tf_api_key', key);
+      alert('API Key saved locally!');
+    }
+
+    function getApiKey() {
+      return document.getElementById('globalApiKey').value.trim();
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-emerald-500/20', 'text-emerald-300', 'border', 'border-emerald-500/30');
+        btn.classList.add('text-slate-400');
+      });
+
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tabBtn-${tabName}`);
+      activeBtn.classList.add('bg-emerald-500/20', 'text-emerald-300', 'border', 'border-emerald-500/30');
+      activeBtn.classList.remove('text-slate-400');
+    }
+
+    async function checkHealth() {
+      try {
+        const res = await fetch('/health');
+        const data = await res.json();
+        const dot = document.getElementById('healthDot');
+        const txt = document.getElementById('healthText');
+
+        if (data.status === 'ok') {
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+          txt.textContent = `Online • ${data.model_version}`;
+          document.getElementById('modelVersionLabel').textContent = `Model: ${data.model_version}`;
+        } else {
+          dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+          txt.textContent = 'Loading model...';
+        }
+      } catch (err) {
+        document.getElementById('healthDot').className = 'w-2 h-2 rounded-full bg-red-500';
+        document.getElementById('healthText').textContent = 'API Offline';
+      }
+    }
+
+    const samples = {
+      singlish: {
+        channel: 'chat',
+        subject: '',
+        text: 'bro mage order eka hour ekakata wada late, driver call ganne na. refund ekak denna'
+      },
+      sinhala: {
+        channel: 'chat',
+        subject: '',
+        text: 'කාර් එකේ මගේ බෑග් එක අමතක වුණා, ඩ්‍රයිවර්ට කතා කරන්න පුළුවන්ද?'
+      },
+      tamil: {
+        channel: 'chat',
+        subject: '',
+        text: 'என் ஆர்டர்ல ஒரு ஐட்டம் வரல, பணம் திருப்பி தாங்க'
+      },
+      safety: {
+        channel: 'call_transcript',
+        subject: '',
+        text: 'customer: hello hello yes the driver took a wrong turn and he is not stopping the car i am scared please help me'
+      }
+    };
+
+    function loadSample(key) {
+      const s = samples[key];
+      if (!s) return;
+      document.getElementById('inputChannel').value = s.channel;
+      document.getElementById('inputSubject').value = s.subject;
+      document.getElementById('inputText').value = s.text;
+    }
+
+    async function runSinglePrediction() {
+      const apiKey = getApiKey();
+      const ticket_id = document.getElementById('inputTicketId').value;
+      const channel = document.getElementById('inputChannel').value;
+      const subject = document.getElementById('inputSubject').value;
+      const text = document.getElementById('inputText').value;
+
+      if (!text.trim()) {
+        alert('Please enter ticket text.');
+        return;
+      }
+
+      const headers = { 'Content-Type': 'application/json' };
+      if (apiKey) headers['X-API-Key'] = apiKey;
+
+      const payload = { ticket_id, channel, subject, text };
+      const t0 = performance.now();
+
+      try {
+        const res = await fetch('/predict', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(payload)
+        });
+
+        const elapsed = Math.round(performance.now() - t0);
+        document.getElementById('latencyBadge').textContent = `${elapsed} ms`;
+
+        const data = await res.json();
+        document.getElementById('outputEmpty').classList.add('hidden');
+        document.getElementById('outputResult').classList.remove('hidden');
+
+        if (!res.ok) {
+          document.getElementById('resCategory').textContent = 'Error: ' + res.status;
+          document.getElementById('resTeam').textContent = data.error ? data.error.message : 'Failed';
+          document.getElementById('resRawJson').textContent = JSON.stringify(data, null, 2);
+          return;
+        }
+
+        document.getElementById('resCategory').textContent = data.category;
+        document.getElementById('resTeam').textContent = data.team;
+        document.getElementById('resSecondary').textContent = data.secondary_category || 'null';
+
+        const urg = document.getElementById('resUrgent');
+        urg.textContent = data.is_urgent ? 'URGENT' : 'NORMAL';
+        urg.className = data.is_urgent 
+          ? 'px-2 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30'
+          : 'px-2 py-0.5 rounded text-xs font-bold bg-slate-800 text-slate-300';
+
+        const confPct = Math.round(data.confidence * 100);
+        document.getElementById('resConfidence').textContent = `${confPct}%`;
+        document.getElementById('resConfBar').style.width = `${confPct}%`;
+        document.getElementById('resRawJson').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        alert('Error communicating with API: ' + err.message);
+      }
+    }
+
+    async function loadSampleBatch() {
+      try {
+        const res = await fetch('/static/sample_tickets.json');
+        const data = await res.json();
+        document.getElementById('batchJsonInput').value = JSON.stringify(data.slice(0, 5), null, 2);
+      } catch (e) {
+        alert('Failed to load sample batch');
+      }
+    }
+
+    async function runBatchPrediction() {
+      const apiKey = getApiKey();
+      const jsonText = document.getElementById('batchJsonInput').value.trim();
+      if (!jsonText) return alert('Please enter or load tickets JSON');
+
+      let tickets;
+      try {
+        tickets = JSON.parse(jsonText);
+      } catch (e) {
+        return alert('Invalid JSON in batch payload');
+      }
+
+      const headers = { 'Content-Type': 'application/json' };
+      if (apiKey) headers['X-API-Key'] = apiKey;
+
+      const t0 = performance.now();
+      try {
+        const res = await fetch('/predict/batch', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ tickets })
+        });
+        const elapsed = Math.round(performance.now() - t0);
+        const data = await res.json();
+
+        if (!res.ok) {
+          return alert('Batch Error: ' + (data.error ? data.error.message : res.status));
+        }
+
+        document.getElementById('batchResultsContainer').classList.remove('hidden');
+        document.getElementById('batchCount').textContent = data.predictions.length;
+        document.getElementById('batchLatency').textContent = `${elapsed} ms total`;
+
+        const tbody = document.getElementById('batchTableBody');
+        tbody.innerHTML = '';
+        data.predictions.forEach(p => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="p-3 text-slate-300">${p.ticket_id}</td>
+            <td class="p-3 text-emerald-400 font-semibold">${p.category}</td>
+            <td class="p-3 text-cyan-300">${p.team}</td>
+            <td class="p-3 text-slate-400">${p.secondary_category || 'null'}</td>
+            <td class="p-3">${p.is_urgent ? '<span class="text-red-400 font-bold">YES</span>' : '<span class="text-slate-500">NO</span>'}</td>
+            <td class="p-3 text-white font-bold">${Math.round(p.confidence * 100)}%</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    async function submitTestJob() {
+      const apiKey = getApiKey();
+      const headers = { 'Content-Type': 'application/json' };
+      if (apiKey) headers['X-API-Key'] = apiKey;
+
+      // Create 15 sample tickets for demo job
+      const tickets = Array.from({ length: 15 }, (_, i) => ({
+        ticket_id: `TF-JOB-DEMO-${String(i+1).padStart(4, '0')}`,
+        channel: i % 2 === 0 ? 'chat' : 'email',
+        subject: i % 2 === 0 ? '' : 'Order issue inquiry',
+        text: i % 3 === 0 ? 'late delivery and cold food' : 'need refund for missing order'
+      }));
+
+      try {
+        const res = await fetch('/batch/jobs', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ tickets })
+        });
+        const data = await res.json();
+        if (!res.ok) return alert('Job Error: ' + (data.error ? data.error.message : res.status));
+
+        activeJobId = data.job_id;
+        document.getElementById('activeJobCard').classList.remove('hidden');
+        document.getElementById('jobIdLabel').textContent = activeJobId;
+
+        if (activeJobPollInterval) clearInterval(activeJobPollInterval);
+        activeJobPollInterval = setInterval(pollActiveJob, 1500);
+      } catch (err) {
+        alert('Failed to submit job: ' + err.message);
+      }
+    }
+
+    async function pollActiveJob() {
+      if (!activeJobId) return;
+      const apiKey = getApiKey();
+      const headers = {};
+      if (apiKey) headers['X-API-Key'] = apiKey;
+
+      try {
+        const res = await fetch(`/batch/jobs/${activeJobId}`, { headers });
+        const data = await res.json();
+
+        document.getElementById('jobStatusBadge').textContent = data.status.toUpperCase();
+        document.getElementById('jobProcessedCount').textContent = data.processed;
+        document.getElementById('jobTotalCount').textContent = data.total;
+
+        const pct = Math.round((data.processed / data.total) * 100) || 0;
+        document.getElementById('jobProgressPercent').textContent = `${pct}%`;
+        document.getElementById('jobProgressBar').style.width = `${pct}%`;
+
+        if (data.status === 'succeeded') {
+          clearInterval(activeJobPollInterval);
+          fetchJobResults();
+        } else if (data.status === 'failed' || data.status === 'cancelled') {
+          clearInterval(activeJobPollInterval);
+        }
+      } catch (e) {}
+    }
+
+    async function fetchJobResults() {
+      const apiKey = getApiKey();
+      const headers = {};
+      if (apiKey) headers['X-API-Key'] = apiKey;
+
+      try {
+        const res = await fetch(`/batch/jobs/${activeJobId}/results`, { headers });
+        const data = await res.json();
+        document.getElementById('jobResultsContainer').classList.remove('hidden');
+        document.getElementById('jobResultsRaw').textContent = JSON.stringify(data, null, 2);
+      } catch (e) {}
+    }
+
+    async function cancelActiveJob() {
+      if (!activeJobId) return;
+      const apiKey = getApiKey();
+      const headers = {};
+      if (apiKey) headers['X-API-Key'] = apiKey;
+
+      await fetch(`/batch/jobs/${activeJobId}`, { method: 'DELETE', headers });
+      clearInterval(activeJobPollInterval);
+      document.getElementById('jobStatusBadge').textContent = 'CANCELLED';
+    }
+  </script>
+</body>
+</html>
