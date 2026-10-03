@@ -23,8 +23,8 @@ from sklearn.metrics import classification_report, f1_score
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
-from src.models.preprocessor import TicketPreprocessor
-from src.core.config import settings
+from backend.models.preprocessor import TicketPreprocessor
+from backend.core.config import settings
 
 
 def prepare_features(df: pd.DataFrame) -> list[str]:

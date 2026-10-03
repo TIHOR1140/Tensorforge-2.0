@@ -3,8 +3,8 @@
 from typing import List, Optional
 import time
 
-from src.models.pipeline import pipeline
-from src.schemas.predict import (
+from backend.models.pipeline import pipeline
+from backend.schemas.predict import (
     PredictRequest,
     PredictResponse,
     BatchRequest,

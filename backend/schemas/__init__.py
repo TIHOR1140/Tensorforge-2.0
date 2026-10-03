@@ -1,9 +1,9 @@
 """Pydantic schemas mirroring OpenAPI 3.0 specification for TensorForge 2.0."""
 
-from src.schemas.common import *  # noqa: F401, F403
-from src.schemas.error import ErrorDetail, ErrorPayload, ErrorResponse
-from src.schemas.health import HealthResponse
-from src.schemas.predict import (
+from backend.schemas.common import *  # noqa: F401, F403
+from backend.schemas.error import ErrorDetail, ErrorPayload, ErrorResponse
+from backend.schemas.health import HealthResponse
+from backend.schemas.predict import (
     PredictRequest,
     PredictResponse,
     BatchRequest,
@@ -11,7 +11,7 @@ from src.schemas.predict import (
     BatchMeta,
     BatchRequestTicket,
 )
-from src.schemas.batch_jobs import (
+from backend.schemas.batch_jobs import (
     BatchJobRequest,
     BatchJobStatus,
     BatchJobResults,

@@ -8,10 +8,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from src.core.config import settings
-from src.models.pipeline import pipeline
-from src.api.routes import health, predict, batch_jobs
-from src.api.error_handlers import (
+from backend.core.config import settings
+from backend.models.pipeline import pipeline
+from backend.api.routes import health, predict, batch_jobs
+from backend.api.error_handlers import (
     validation_exception_handler,
     http_exception_handler,
     generic_exception_handler,

@@ -3,14 +3,14 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
 
-from src.api.dependencies import verify_api_key, get_request_id
-from src.core.constants import JobStatus
-from src.schemas.batch_jobs import (
+from backend.api.dependencies import verify_api_key, get_request_id
+from backend.core.constants import JobStatus
+from backend.schemas.batch_jobs import (
     BatchJobRequest,
     BatchJobStatus,
     BatchJobResults,
 )
-from src.services.job_manager import job_manager
+from backend.services.job_manager import job_manager
 
 router = APIRouter(prefix="/batch/jobs", tags=["Evaluation"])
 

@@ -2,14 +2,14 @@
 
 from typing import Optional
 from fastapi import APIRouter, Depends, Response, Header
-from src.api.dependencies import verify_api_key, get_request_id
-from src.schemas.predict import (
+from backend.api.dependencies import verify_api_key, get_request_id
+from backend.schemas.predict import (
     PredictRequest,
     PredictResponse,
     BatchRequest,
     BatchResponse
 )
-from src.services.prediction_service import PredictionService
+from backend.services.prediction_service import PredictionService
 
 router = APIRouter(tags=["Core", "Evaluation"])
 

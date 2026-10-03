@@ -2,8 +2,8 @@
 
 from typing import List, Optional
 from pydantic import BaseModel, Field, model_validator
-from src.core.constants import JobStatus
-from src.schemas.predict import BatchRequestTicket, PredictResponse
+from backend.core.constants import JobStatus
+from backend.schemas.predict import BatchRequestTicket, PredictResponse
 
 
 class BatchJobRequest(BaseModel):

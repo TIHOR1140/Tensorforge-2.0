@@ -3,7 +3,7 @@
 import re
 from typing import List, Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
-from src.core.constants import (
+from backend.core.constants import (
     Category,
     Team,
     Channel,

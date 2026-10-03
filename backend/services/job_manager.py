@@ -6,15 +6,15 @@ import time
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Tuple
 
-from src.core.config import settings
-from src.core.constants import JobStatus
-from src.models.pipeline import pipeline
-from src.schemas.batch_jobs import (
+from backend.core.config import settings
+from backend.core.constants import JobStatus
+from backend.models.pipeline import pipeline
+from backend.schemas.batch_jobs import (
     BatchJobStatus,
     BatchJobResults,
     BatchJobError,
 )
-from src.schemas.predict import BatchRequestTicket, PredictResponse
+from backend.schemas.predict import BatchRequestTicket, PredictResponse
 
 
 class JobRecord:

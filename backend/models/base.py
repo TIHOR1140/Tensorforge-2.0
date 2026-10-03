@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import List
-from src.schemas.predict import PredictRequest, PredictResponse
+from backend.schemas.predict import PredictRequest, PredictResponse
 
 
 class BasePredictor(ABC):

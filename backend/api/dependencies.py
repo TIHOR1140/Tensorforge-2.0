@@ -3,8 +3,8 @@
 import secrets
 from typing import Optional
 from fastapi import Header, HTTPException, status
-from src.core.config import settings
-from src.schemas.error import ErrorResponse, ErrorPayload
+from backend.core.config import settings
+from backend.schemas.error import ErrorResponse, ErrorPayload
 
 
 async def verify_api_key(

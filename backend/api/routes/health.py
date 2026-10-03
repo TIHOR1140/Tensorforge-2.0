@@ -1,8 +1,8 @@
 """Health check endpoint (public)."""
 
 from fastapi import APIRouter, Response, status
-from src.models.pipeline import pipeline
-from src.schemas.health import HealthResponse
+from backend.models.pipeline import pipeline
+from backend.schemas.health import HealthResponse
 
 router = APIRouter(tags=["Core"])
 

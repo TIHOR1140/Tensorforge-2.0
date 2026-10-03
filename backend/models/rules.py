@@ -1,7 +1,7 @@
 """Business and consistency rules for classification and routing."""
 
 from typing import Optional, Tuple
-from src.core.constants import Category, Team, CATEGORY_TO_TEAM
+from backend.core.constants import Category, Team, CATEGORY_TO_TEAM
 
 
 def get_team_for_category(category: Category) -> Team:

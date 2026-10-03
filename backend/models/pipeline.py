@@ -5,12 +5,12 @@ import joblib
 from pathlib import Path
 from typing import List, Optional
 
-from src.core.config import settings
-from src.core.constants import Category, Team
-from src.models.base import BasePredictor
-from src.models.preprocessor import TicketPreprocessor
-from src.models.rules import enforce_consistency_rules
-from src.schemas.predict import PredictRequest, PredictResponse
+from backend.core.config import settings
+from backend.core.constants import Category, Team
+from backend.models.base import BasePredictor
+from backend.models.preprocessor import TicketPreprocessor
+from backend.models.rules import enforce_consistency_rules
+from backend.schemas.predict import PredictRequest, PredictResponse
 
 
 class ClassificationPipeline(BasePredictor):
