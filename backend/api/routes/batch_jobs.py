@@ -41,7 +41,8 @@ async def submit_batch_job(
         response.headers["Retry-After"] = "10"
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail={"code": "rate_limited", "message": "Too many active or queued jobs. Try again later."}
+            detail={"code": "too_many_jobs", "message": "Too many active or queued jobs. Try again later."},
+            headers={"Retry-After": "10"}
         )
 
     response.status_code = status.HTTP_202_ACCEPTED
@@ -70,12 +71,12 @@ async def get_job_status(
     if code == 404:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={"code": "not_found", "message": f"Job '{job_id}' not found."}
+            detail={"code": "job_not_found", "message": f"Job '{job_id}' not found."}
         )
     if code == 410:
         raise HTTPException(
             status_code=status.HTTP_410_GONE,
-            detail={"code": "expired", "message": f"Job '{job_id}' has expired and was discarded."}
+            detail={"code": "job_expired", "message": f"Job '{job_id}' has expired and was discarded."}
         )
 
     # If job is still queued or running, supply Retry-After header
@@ -95,7 +96,7 @@ async def get_job_results(
     job_id: str,
     response: Response,
     offset: int = Query(0, ge=0, description="Offset for pagination"),
-    limit: int = Query(100, ge=1, le=1000, description="Items per page"),
+    limit: int = Query(100, ge=1, le=5000, description="Items per page (up to 5,000)"),
     request_id: Optional[str] = Depends(get_request_id),
     _api_key: str = Depends(verify_api_key),
 ) -> BatchJobResults:
@@ -107,17 +108,17 @@ async def get_job_results(
     if code == 404:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={"code": "not_found", "message": f"Job '{job_id}' not found."}
+            detail={"code": "job_not_found", "message": f"Job '{job_id}' not found."}
         )
     if code == 410:
         raise HTTPException(
             status_code=status.HTTP_410_GONE,
-            detail={"code": "expired", "message": f"Job '{job_id}' results have expired."}
+            detail={"code": "job_expired", "message": f"Job '{job_id}' results have expired."}
         )
     if code == 409:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={"code": "conflict", "message": f"Job '{job_id}' is not yet completed."}
+            detail={"code": "job_not_ready", "message": f"Job '{job_id}' is not yet completed."}
         )
 
     return results
@@ -142,6 +143,7 @@ async def cancel_or_discard_job(
     if code == 404:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={"code": "not_found", "message": f"Job '{job_id}' not found."}
+            detail={"code": "job_not_found", "message": f"Job '{job_id}' not found."}
         )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+

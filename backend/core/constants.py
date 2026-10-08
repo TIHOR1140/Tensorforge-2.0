@@ -65,17 +65,18 @@ ALL_CATEGORIES: List[str] = [cat.value for cat in Category]
 ALL_TEAMS: List[str] = [team.value for team in Team]
 ALL_CHANNELS: List[str] = [ch.value for ch in Channel]
 
-# Standard error codes
+# Standard error codes per OpenAPI specification
 class ErrorCode(str, Enum):
     VALIDATION_ERROR = "validation_error"
     UNAUTHORIZED = "unauthorized"
     PAYLOAD_TOO_LARGE = "payload_too_large"
     UNSUPPORTED_MEDIA_TYPE = "unsupported_media_type"
     MALFORMED_JSON = "malformed_json"
-    NOT_FOUND = "not_found"
-    CONFLICT = "conflict"
-    EXPIRED = "expired"
-    RATE_LIMITED = "rate_limited"
+    JOB_NOT_FOUND = "job_not_found"
+    JOB_NOT_READY = "job_not_ready"
+    JOB_EXPIRED = "job_expired"
+    TOO_MANY_JOBS = "too_many_jobs"
     SERVICE_UNAVAILABLE = "service_unavailable"
     INTERRUPTED = "interrupted"
     INTERNAL_ERROR = "internal_error"
+    NOT_FOUND = "not_found"

@@ -24,8 +24,9 @@ class Settings(BaseSettings):
     # Limits per OpenAPI specification
     MAX_SYNC_BATCH_ITEMS: int = 100
     MAX_ASYNC_JOB_ITEMS: int = 5000
-    MAX_SYNC_PAYLOAD_BYTES: int = 5 * 1024 * 1024      # 5 MB
-    MAX_ASYNC_PAYLOAD_BYTES: int = 25 * 1024 * 1024   # 25 MB
+    MAX_SINGLE_PAYLOAD_BYTES: int = 1 * 1024 * 1024    # 1 MB for /predict
+    MAX_SYNC_PAYLOAD_BYTES: int = 5 * 1024 * 1024      # 5 MB for /predict/batch
+    MAX_ASYNC_PAYLOAD_BYTES: int = 25 * 1024 * 1024   # 25 MB for /batch/jobs
 
     # Concurrency & Retention rules
     MAX_CONCURRENT_JOBS: int = 1

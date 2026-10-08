@@ -16,12 +16,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install python dependencies
+# Install python dependencies first (layer caching)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project files and bundled models
-COPY . /app/
+# Copy backend source
+COPY backend/ backend/
+
+# Copy trained ML model artifacts (required at runtime)
+COPY ml/artifacts/ ml/artifacts/
+
+# Copy pre-built React frontend
+COPY frontend/dist/ frontend/dist/
+
+# Copy schemas for validation
+COPY schemas/ schemas/
+
+# Copy .env.example as fallback (actual API_KEY comes from -e flag)
+COPY .env.example .env.example
 
 # Environment defaults
 ENV PYTHONUNBUFFERED=1 \
@@ -32,8 +44,8 @@ ENV PYTHONUNBUFFERED=1 \
 EXPOSE 8000
 
 # Health check
-HEALTHCHECK --interval=5s --timeout=3s --start-period=5s --retries=5 \
+HEALTHCHECK --interval=5s --timeout=3s --start-period=10s --retries=5 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Start FastAPI application
-CMD ["uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+CMD ["uvicorn", "backend.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
