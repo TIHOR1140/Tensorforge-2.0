@@ -1681,7 +1681,7 @@ TF-004,chat,,Burger was missing from package,order_missing_wrong,,false`;
       {/* ========================================================================= */}
       <footer className="mt-auto border-t border-slate-200/80 bg-white/60 py-6 text-center">
         <p className="text-xs text-slate-500 font-medium">
-          © 2026 Team CTRL+C. All rights reserved. | <a href="
+          © 2026 TEAM CTRL+C. All rights reserved.
         </p>
       </footer>
 
