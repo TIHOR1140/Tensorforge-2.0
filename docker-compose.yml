@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  tensorforge-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tensorforge-mvp
+    ports:
+      - "8000:8000"
+    environment:
+      - API_KEY=${API_KEY:-dev-secret-key-123}
+      - HOST=0.0.0.0
+      - PORT=8000
+    restart: unless-stopped
+

@@ -37,8 +37,8 @@ MANIFEST
 credentials.json
 frontend/.env
 frontend/.env.*
-!frontend/.env.example
-frontend/dist/
+# frontend/dist/ is intentionally tracked so Docker container builds offline without Node.js
+!frontend/dist/
 
 # Virtual Environments
 .venv
