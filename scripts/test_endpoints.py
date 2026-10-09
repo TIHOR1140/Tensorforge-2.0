@@ -11,6 +11,13 @@ Tests:
 """
 
 import sys
+from pathlib import Path
+
+# Add project root to path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from fastapi.testclient import TestClient
 from backend.api.app import app
 from backend.core.config import settings
@@ -20,7 +27,9 @@ def run_tests():
     print("TensorForge 2.0 -- Comprehensive Endpoint Compliance Test")
     print("=" * 60)
 
-    api_key = settings.API_KEY or "tf2_82e3d8feb90e34ba176854047b4c2755e1006bce47b52879"
+    api_key = settings.API_KEY or "dev-eval-key"
+    if not settings.API_KEY:
+        print("[!] Warning: API_KEY is not set in environment or .env. Using mock key for testing.")
     auth_headers = {"X-API-Key": api_key, "X-Request-ID": "test-req-12345"}
 
     with TestClient(app) as client:

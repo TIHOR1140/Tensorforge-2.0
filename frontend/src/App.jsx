@@ -33,7 +33,10 @@ import {
 } from 'lucide-react';
 
 const API_BASE = '';
-const DEFAULT_API_KEY = 'tf2_82e3d8feb90e34ba176854047b4c2755e1006bce47b52879';
+
+// Security: Production/evaluation API Keys must NEVER be hardcoded into source code.
+// The key is dynamically loaded from browser localStorage (or optional local uncommitted .env.local).
+const ENV_VITE_API_KEY = typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_KEY ? import.meta.env.VITE_API_KEY : '';
 
 // 11 Official Competition Categories
 const CATEGORY_MAP = [
@@ -125,8 +128,8 @@ export default function App() {
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
-  // App & Auth State
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('tf2_api_key') || DEFAULT_API_KEY);
+  // App & Auth State (stored securely in client localStorage only)
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('tf2_api_key') || ENV_VITE_API_KEY || '');
   const [health, setHealth] = useState({ status: 'ok', model_version: 'v1.0' });
   const [toasts, setToasts] = useState([]);
 
@@ -583,7 +586,9 @@ TF-004,chat,,Burger was missing from package,order_missing_wrong,,false`;
                 <div className="absolute right-0 top-full mt-1.5 w-60 bg-white rounded-xl shadow-xl border border-slate-200/80 p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                   <div className="p-2 border-b border-slate-100">
                     <div className="font-bold text-xs text-slate-900">Riders Team (KDU)</div>
-                    <div className="text-[11px] text-slate-500 truncate font-mono mt-0.5">Key: {apiKey.slice(0, 10)}...</div>
+                    <div className="text-[11px] text-slate-500 font-mono mt-0.5">
+                      {apiKey ? `Key: ••••••••${apiKey.slice(-4)}` : 'Status: Key Not Set'}
+                    </div>
                   </div>
                   <div className="pt-1.5 space-y-1">
                     <button
@@ -1699,24 +1704,35 @@ TF-004,chat,,Burger was missing from package,order_missing_wrong,,false`;
               Requests to <code className="font-mono text-slate-800">/predict</code> and <code className="font-mono text-slate-800">/batch/jobs</code> require a valid <code className="font-mono text-slate-800">X-API-Key</code> header matching the server environment.
             </p>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">X-API-Key</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-semibold text-slate-700">X-API-Key</label>
+                <span className="text-[10px] text-slate-400">Stored locally in browser only</span>
+              </div>
               <input
-                type="text"
+                type="password"
+                placeholder="Paste team API Key (e.g. tf2_...)"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 className="w-full text-xs font-mono px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
+            <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-500 leading-relaxed">
+              <span className="font-semibold text-slate-700">Security Guarantee:</span> Keys are never committed to Git or hardcoded in source files. The backend validates this token against the server-side environment variable.
+            </div>
             <div className="flex justify-end gap-2 pt-2">
               <button
-                onClick={() => { setApiKey(DEFAULT_API_KEY); addToast('Reset to default key', 'info'); }}
-                className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg font-medium"
+                onClick={() => { setApiKey(''); localStorage.removeItem('tf2_api_key'); addToast('Cleared local API key', 'info'); }}
+                className="px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-lg font-medium transition-colors"
               >
-                Reset Default
+                Clear Key
               </button>
               <button
-                onClick={() => { setApiKeyModalOpen(false); addToast('Saved API Key', 'success'); }}
-                className="px-4 py-1.5 text-xs font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm"
+                onClick={() => {
+                  if (apiKey) localStorage.setItem('tf2_api_key', apiKey);
+                  setApiKeyModalOpen(false);
+                  addToast('Saved API Key to local session', 'success');
+                }}
+                className="px-4 py-1.5 text-xs font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-colors"
               >
                 Save
               </button>
