@@ -414,4 +414,4 @@ python scripts/test_endpoints.py
 
 - **Competition:** TensorForge 2.0 (Phase 2 MVP Stage)
 - **Organized by:** **IEEE Computer Society Student Branch of General Sir John Kotelawala Defence University (KDU)**
-- **License:** MIT License — Open for evaluation and academic review.
+- **License:** Team CTRL+C — Open for evaluation and review.
